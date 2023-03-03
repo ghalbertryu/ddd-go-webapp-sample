@@ -1,7 +1,11 @@
 package user
 
 type User struct {
-	Id   int    `json:"uid"`
-	Name string `json:"name"`
-	Age  int    `json:"age"`
+	Id       uint64 `json:"uid"`
+	Account  string `json:"acc"`
+	Password string `json:"pwd"`
+}
+
+func NewUser(account string) *User {
+	return &User{Account: account}
 }

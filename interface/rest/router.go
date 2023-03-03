@@ -12,7 +12,7 @@ func InitRouter() *gin.Engine {
 
 	userRouter := router.Group("/v1/user")
 	{
-		userRouter.GET("/:name/:param", handler.GetUser)
+		userRouter.GET("/:id", handler.GetUser)
 		userRouter.GET("", handler.QueryUser)
 		userRouter.POST("", handler.CreatUser)
 		userRouter.PUT("/:id", handler.UpdateUser)

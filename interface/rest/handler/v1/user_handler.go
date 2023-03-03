@@ -9,18 +9,17 @@ import (
 	"strconv"
 )
 
-// e.g. http://localhost:8080/v1/user/Albert/xxx
+// e.g. http://localhost:8080/v1/user/id
 func GetUser(context *gin.Context) {
-	name := context.Param("name")
-	param := context.Param("param")
+	id := context.Param("id")
 
-	log.Println("getUser. param=", param)
+	log.Println("getUser. id=", id)
 	context.JSON(http.StatusOK, gin.H{
-		"msg": user.User{1, name, 33},
+		"msg": user.NewUser(id),
 	})
 }
 
-// e.g. http://localhost:8080/v1/user?name=Albert
+// e.g. http://localhost:8080/v1/user?acc=Albert
 func QueryUser(context *gin.Context) {
 	var queryUser user.User
 	context.ShouldBindQuery(&queryUser)
@@ -31,7 +30,7 @@ func QueryUser(context *gin.Context) {
 	})
 }
 
-// e.g. curl -X POST http://localhost:8080/v1/user -H 'Content-Type: application/json' -d '{"uid":123, "name":"Albert"}'
+// e.g. curl -X POST http://localhost:8080/v1/user -H 'Content-Type: application/json' -d '{"acc":"Albert", "pwd":"abc123"}'
 func CreatUser(context *gin.Context) {
 	var userPost user.User
 	if context.ShouldBind(&userPost) == nil {
@@ -43,16 +42,21 @@ func CreatUser(context *gin.Context) {
 	}
 }
 
-// e.g. curl -X PUT http://localhost:8080/v1/user/22 -H 'Content-Type: application/json' -d '{"uid":123, "name":"Ryu", "age":22}'
+// e.g. curl -X PUT http://localhost:8080/v1/user/22 -H 'Content-Type: application/json' -d '{"uid":321, "acc":"Ryu", "pwd":"ddd333"}'
 func UpdateUser(context *gin.Context) {
 	idStr := context.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err == nil {
 		var userPut user.User
 		if context.ShouldBind(&userPut) == nil {
+			newUser := user.NewUser(userPut.Account)
+			newUser.Id = id
+			newUser.Password = userPut.Password
 			context.JSON(http.StatusOK, gin.H{
-				"msg": user.User{id, userPut.Name, userPut.Age},
+				"msg": newUser,
 			})
 		}
+	} else {
+		log.Println(err)
 	}
 }
