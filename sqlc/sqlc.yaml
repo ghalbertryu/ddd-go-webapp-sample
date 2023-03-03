@@ -1,0 +1,8 @@
+version: 1
+packages:
+  - path: "user_repo"
+    name: "user_repo"
+    engine: "mysql"
+    schema: "schema.sql"
+    queries: "query.sql"
+    emit_json_tags: true
