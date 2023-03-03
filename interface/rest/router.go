@@ -2,18 +2,20 @@ package rest
 
 import (
 	"github.com/gin-gonic/gin"
-	"m/interface/rest/v1"
+	"m/interface/rest/handler/v1"
+	"m/interface/rest/middleware"
 )
 
 func InitRouter() *gin.Engine {
 	router := gin.Default()
+	router.Use(middleware.Logger(), middleware.Auth(), gin.Recovery())
+
 	userRouter := router.Group("/v1/user")
 	{
-		userRouter.GET("/:name/:param", rest.GetUser)
-		userRouter.GET("", rest.QueryUser)
-		userRouter.POST("", rest.CreatUser)
-		userRouter.PUT("/:id", rest.UpdateUser)
+		userRouter.GET("/:name/:param", handler.GetUser)
+		userRouter.GET("", handler.QueryUser)
+		userRouter.POST("", handler.CreatUser)
+		userRouter.PUT("/:id", handler.UpdateUser)
 	}
-
 	return router
 }
