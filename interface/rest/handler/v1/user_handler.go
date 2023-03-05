@@ -1,21 +1,23 @@
 package handler
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"log"
 	"m/domain/user"
+	"m/infrastructure/repo"
 	"m/infrastructure/utils"
 	"net/http"
 	"strconv"
 )
 
 // e.g. http://localhost:8080/v1/user/id
-func GetUser(context *gin.Context) {
-	id := context.Param("id")
-
+func GetUser(c *gin.Context) {
+	id := c.Param("id")
 	log.Println("getUser. id=", id)
-	context.JSON(http.StatusOK, gin.H{
-		"msg": user.NewUser(id),
+	user, _ := repo.GDB.GetUser(context.Background(), 1)
+	c.JSON(http.StatusOK, gin.H{
+		"msg": user,
 	})
 }
 

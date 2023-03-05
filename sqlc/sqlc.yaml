@@ -1,7 +1,7 @@
 version: 1
 packages:
-  - path: "user_repo"
-    name: "user_repo"
+  - path: "repo"
+    name: "repo"
     engine: "mysql"
     schema: "schema.sql"
     queries: "query.sql"
