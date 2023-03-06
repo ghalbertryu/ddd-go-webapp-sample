@@ -2,9 +2,9 @@
 SELECT * FROM user
 WHERE id = ? LIMIT 1;
 
--- name: ListUsers :many
+-- name: GetUserByAccount :one
 SELECT * FROM user
-ORDER BY account;
+WHERE account = ?;
 
 -- name: CreateUser :execresult
 INSERT INTO user (
@@ -12,3 +12,11 @@ INSERT INTO user (
 ) VALUES (
   ?, ?
 );
+
+-- name: UpdateUser :exec
+UPDATE user SET account = ?, password = ?
+WHERE id = ?;
+
+-- name: ListUsers :many
+SELECT * FROM user
+ORDER BY account;
