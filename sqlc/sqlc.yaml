@@ -1,6 +1,6 @@
 version: 1
 packages:
-  - path: "repo"
+  - path: "../infrastructure/repo"
     name: "repo"
     engine: "mysql"
     schema: "schema.sql"

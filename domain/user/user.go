@@ -8,10 +8,6 @@ type User struct {
 	Password string `json:"pwd"`
 }
 
-func NewUser(account string) *User {
-	return &User{Account: account}
-}
-
 func ConvertUser(userPo repo.User) *User {
 	return &User{userPo.ID, userPo.Account, userPo.Password}
 }

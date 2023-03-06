@@ -45,6 +45,24 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 	return i, err
 }
 
+const getUserByAccount = `-- name: GetUserByAccount :one
+SELECT id, account, password, create_time, update_time FROM user
+WHERE account = ?
+`
+
+func (q *Queries) GetUserByAccount(ctx context.Context, account string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByAccount, account)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Account,
+		&i.Password,
+		&i.CreateTime,
+		&i.UpdateTime,
+	)
+	return i, err
+}
+
 const listUsers = `-- name: ListUsers :many
 SELECT id, account, password, create_time, update_time FROM user
 ORDER BY account
@@ -77,4 +95,20 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE user SET account = ?, password = ?
+WHERE id = ?
+`
+
+type UpdateUserParams struct {
+	Account  string `json:"account"`
+	Password string `json:"password"`
+	ID       int64  `json:"id"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateUser, arg.Account, arg.Password, arg.ID)
+	return err
 }

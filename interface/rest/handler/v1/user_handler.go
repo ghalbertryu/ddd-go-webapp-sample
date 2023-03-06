@@ -18,18 +18,19 @@ func GetUser(c *gin.Context) {
 	userPo, _ := repo.GDB.GetUser(context.Background(), id)
 
 	c.JSON(http.StatusOK, gin.H{
-		"msg": user.User{userPo.ID, userPo.Account, userPo.Password},
+		"msg": user.ConvertUser(userPo),
 	})
 }
 
-// e.g. http://localhost:8080/v1/user?acc=Albert
+// e.g. http://localhost:8080/v1/user?Account=Ryu
 func QueryUser(c *gin.Context) {
 	var queryUser user.User
 	c.ShouldBindQuery(&queryUser)
-
 	log.Printf("%s queryUser=%v\n", utils.Tag("queryUser"), queryUser)
+
+	userPo, _ := repo.GDB.GetUserByAccount(context.Background(), queryUser.Account)
 	c.JSON(http.StatusOK, gin.H{
-		"msg": queryUser,
+		"msg": user.ConvertUser(userPo),
 	})
 }
 
@@ -55,11 +56,12 @@ func UpdateUser(c *gin.Context) {
 
 	var userPut user.User
 	if c.ShouldBind(&userPut) == nil {
-		newUser := user.NewUser(userPut.Account)
-		newUser.Id = id
-		newUser.Password = userPut.Password
+
+		repo.GDB.UpdateUser(context.Background(),
+			repo.UpdateUserParams{userPut.Account, userPut.Password, id})
+		userPo, _ := repo.GDB.GetUser(context.Background(), id)
 		c.JSON(http.StatusOK, gin.H{
-			"msg": newUser,
+			"msg": user.ConvertUser(userPo),
 		})
 	}
 
