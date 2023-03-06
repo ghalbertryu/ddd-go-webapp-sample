@@ -1,9 +1,10 @@
-package db
+package repo
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -17,6 +18,7 @@ func TestCreateUser(t *testing.T) {
 		fmt.Println(err)
 	}
 
-	queries.CreateUser(ctx, CreateUserParams{"xyz", "zyz123"})
-
+	//queries.CreateUser(ctx, CreateUserParams{"xyz", "zyz123"})
+	user, err := queries.GetUser(ctx, 1)
+	log.Printf("%q", user)
 }
