@@ -1,62 +1,66 @@
 package handler
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"log"
 	"m/domain/user"
+	"m/infrastructure/repo"
 	"m/infrastructure/utils"
 	"net/http"
 	"strconv"
 )
 
-// e.g. http://localhost:8080/v1/user/id
-func GetUser(context *gin.Context) {
-	id := context.Param("id")
+// e.g. http://localhost:8080/v1/user/1
+func GetUser(c *gin.Context) {
+	idStr := c.Param("id")
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+	userPo, _ := repo.GDB.GetUser(context.Background(), id)
 
-	log.Println("getUser. id=", id)
-	context.JSON(http.StatusOK, gin.H{
-		"msg": user.NewUser(id),
+	c.JSON(http.StatusOK, gin.H{
+		"msg": user.User{userPo.ID, userPo.Account, userPo.Password},
 	})
 }
 
 // e.g. http://localhost:8080/v1/user?acc=Albert
-func QueryUser(context *gin.Context) {
+func QueryUser(c *gin.Context) {
 	var queryUser user.User
-	context.ShouldBindQuery(&queryUser)
+	c.ShouldBindQuery(&queryUser)
 
 	log.Printf("%s queryUser=%v\n", utils.Tag("queryUser"), queryUser)
-	context.JSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"msg": queryUser,
 	})
 }
 
 // e.g. curl -X POST http://localhost:8080/v1/user -H 'Content-Type: application/json' -d '{"acc":"Albert", "pwd":"abc123"}'
-func CreatUser(context *gin.Context) {
+func CreatUser(c *gin.Context) {
 	var userPost user.User
-	if context.ShouldBind(&userPost) == nil {
-		log.Printf("%s userPost=%v\n", utils.Tag("creatUser"), userPost)
+	if c.ShouldBind(&userPost) == nil {
+		result, _ := repo.GDB.CreateUser(context.Background(),
+			repo.CreateUserParams{userPost.Account, userPost.Password})
 
-		context.JSON(http.StatusOK, gin.H{
-			"msg": userPost,
+		id, _ := result.LastInsertId()
+		userPo, _ := repo.GDB.GetUser(context.Background(), id)
+		c.JSON(http.StatusOK, gin.H{
+			"msg": user.ConvertUser(userPo),
 		})
 	}
 }
 
-// e.g. curl -X PUT http://localhost:8080/v1/user/22 -H 'Content-Type: application/json' -d '{"uid":321, "acc":"Ryu", "pwd":"ddd333"}'
-func UpdateUser(context *gin.Context) {
-	idStr := context.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err == nil {
-		var userPut user.User
-		if context.ShouldBind(&userPut) == nil {
-			newUser := user.NewUser(userPut.Account)
-			newUser.Id = id
-			newUser.Password = userPut.Password
-			context.JSON(http.StatusOK, gin.H{
-				"msg": newUser,
-			})
-		}
-	} else {
-		log.Println(err)
+// e.g. curl -X PUT http://localhost:8080/v1/user/2 -H 'Content-Type: application/json' -d '{"acc":"Ryu", "pwd":"ddd333"}'
+func UpdateUser(c *gin.Context) {
+	idStr := c.Param("id")
+	id, _ := strconv.ParseInt(idStr, 10, 64)
+
+	var userPut user.User
+	if c.ShouldBind(&userPut) == nil {
+		newUser := user.NewUser(userPut.Account)
+		newUser.Id = id
+		newUser.Password = userPut.Password
+		c.JSON(http.StatusOK, gin.H{
+			"msg": newUser,
+		})
 	}
+
 }
